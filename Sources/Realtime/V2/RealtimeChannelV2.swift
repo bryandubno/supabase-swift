@@ -357,6 +357,29 @@ public actor RealtimeChannelV2 {
     return stream
   }
 
+  /// Listens for presence changes and caches the presences based on their keys. This function automatically handles joins and leaves.
+  ///
+  /// If you want more control, use ``presenceChange()``.
+  public func presenceSync() -> AsyncStream<[PresenceV2]> {
+    let sync = LockIsolated([String: PresenceV2]())
+
+    return presenceChange()
+      .map { action in
+        sync.withValue {
+          for (key, join) in action.joins {
+            $0[key] = join
+          }
+
+          for (key, _) in action.leaves {
+            $0[key] = nil
+          }
+
+          return Array($0.values)
+        }
+      }
+      .eraseToStream()
+  }
+
   /// Listen for postgres changes in a channel.
   public func postgresChange(
     _: InsertAction.Type,
