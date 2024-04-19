@@ -20,28 +20,24 @@ actor PushV2 {
   }
 
   func send() async -> PushStatus {
-    do {
-      try await channel?.socket?.ws.send(message)
+    await channel?.socket?.send(message)
 
-      if channel?.config.broadcast.acknowledgeBroadcasts == true {
-        return await withCheckedContinuation {
-          receivedContinuation = $0
+    if channel?.config.broadcast.acknowledgeBroadcasts == true {
+      do {
+        return try await withTimeout(interval: channel?.socket?.config.timeoutInterval ?? 10) {
+          await withCheckedContinuation {
+            self.receivedContinuation = $0
+          }
         }
+      } catch is TimeoutError {
+        return .timeout
+      } catch {
+        channel?.logger?.error("error sending Push: \(error)")
+        return .error
       }
-
-      return .ok
-    } catch {
-      await channel?.socket?.config.logger?.debug(
-        """
-        Failed to send message:
-        \(message)
-
-        Error:
-        \(error)
-        """
-      )
-      return .error
     }
+
+    return .ok
   }
 
   func didReceive(status: PushStatus) {
