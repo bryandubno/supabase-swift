@@ -27,7 +27,7 @@ extension AuthClient {
 
     /// Optional key name used for storing tokens in local storage.
     public var storageKey: String?
-    public let localStorage: any AuthLocalStorage
+    public var localStorage: any AuthLocalStorage
     public let logger: (any SupabaseLogger)?
     public let encoder: JSONEncoder
     public let decoder: JSONDecoder
