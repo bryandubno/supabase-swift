@@ -16,7 +16,7 @@ public final class AuthClient: Sendable {
   let clientID = AuthClientID()
 
   private var api: APIClient { Dependencies[clientID].api }
-  var configuration: AuthClient.Configuration { Dependencies[clientID].configuration }
+  public var configuration: AuthClient.Configuration { Dependencies[clientID].configuration }
   private var codeVerifierStorage: CodeVerifierStorage { Dependencies[clientID].codeVerifierStorage }
   private var date: @Sendable () -> Date { Dependencies[clientID].date }
   private var sessionManager: SessionManager { Dependencies[clientID].sessionManager }
